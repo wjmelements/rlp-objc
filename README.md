@@ -13,6 +13,15 @@ ABI support would be appreciated; please submit a pull request.
 pod 'RLP-ObjC'
 ```
 
+## Usage
+
+```
+#import <rlp.h>
+
+NSData *encoded = rlp_encode(@[ @"cat" ]);
+NSArray *decoded = rlp_decode(encoded);
+```
+
 ## Build with Makefile
 
 - make: incrementally build the things
