@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name = "RLP-ObjC"
-s.version = '1.0.3'
+s.version = '1.0.4'
 s.summary = 'Ethereum RLP in Objective-C'
 
 s.description = <<-DESC
@@ -16,6 +16,10 @@ s.source_files = 'src/*', 'include/*'
 s.public_header_files = 'include/*'
 s.requires_arc = true
 s.framework = 'Foundation'
+
+s.user_target_xcconfig = {
+  'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/RLP-ObjC/include"',
+}
 
 s.pod_target_xcconfig = {
   'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/RLP-ObjC/include"',
