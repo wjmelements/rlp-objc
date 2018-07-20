@@ -56,8 +56,9 @@ static void _rlp_encode_buf(uint8_t *outBytes, const uint8_t *inBytes, size_t in
         size_t lenLength = rlp_len_length(inLength); \
         *outBytes++ = offset + 55 + lenLength; \
         size_t lengthLeft = inLength; \
-        while (lenLength --> 0) { \
-            outBytes[lenLength] = (uint8_t)lengthLeft; \
+        size_t lenLengthLeft = lenLength; \
+        while (lenLengthLeft --> 0) { \
+            outBytes[lenLengthLeft] = (uint8_t)lengthLeft; \
             lengthLeft >>= 8; \
         } \
         outBytes += lenLength; \
