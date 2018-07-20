@@ -1,14 +1,26 @@
-Makefile
-========
+# rlp-objc
+Objective-C implementation of [RLP](https://github.com/ethereum/wiki/wiki/RLP) (Recursive Length Prefix).
 
-Basic Makefile for C/C++ projects.
+This implementation is faster than most other implementations because it only allocates one buffer per encode operation instead of recursively concatenating smaller buffers.
 
-- make: build the things
+While encode can handle NSString and NSData, decode only returns NSData.
+You must use ABI to interpet the types.
+ABI support would be appreciated; please submit a pull request.
+
+## Installation
+
+```
+pod 'RLP-ObjC'
+```
+
+## Build with Makefile
+
+- make: incrementally build the things
 
 - make again: rebuild the things
 
-- make clean: remove the things
+- make clean: remove all build products
 
-- make check: run the tests
+- make check: incrementally run the tests
 
-- make distcheck: run all the tests
+- make distcheck: rerun all the tests
