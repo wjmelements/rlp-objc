@@ -6,7 +6,7 @@ void test_catDog() {
     NSArray *root = @[ @"cat", @"dog" ];
     NSData *rlp = rlp_encode(root);
     assert(rlp.length == 9);
-    uint8_t *bytes = rlp.bytes;
+    const uint8_t *bytes = rlp.bytes;
     assert(bytes[0] == 0xc8);
     assert(bytes[1] == 0x83);
     assert(bytes[2] == 'c');
@@ -22,7 +22,7 @@ void test_setTheory3() {
     NSArray *root = @[ @[], @[@[]], @[ @[], @[@[]] ] ];
     NSData *rlp = rlp_encode(root);
     assert(rlp.length == 8);
-    uint8_t *bytes = (uint8_t *)rlp.bytes;
+    const uint8_t *bytes = rlp.bytes;
     uint8_t expected[8] = {0xc7, 0xc0, 0xc1, 0xc0, 0xc3, 0xc0, 0xc1, 0xc0};
     for (int i = 0; i < 8; i++) {
         assert(expected[i] == bytes[i]);
@@ -32,8 +32,8 @@ void test_setTheory3() {
 void test_loremIpsum() {
     NSString *in = @"Lorem ipsum dolor sit amet, consectetur adipisicing elit";
     NSData *out = rlp_encode(in);
-    uint8_t *bytes = (uint8_t *)out.bytes;
-    uint8_t *inBytes = (uint8_t *)in.UTF8String;
+    const uint8_t *bytes = out.bytes;
+    const uint8_t *inBytes = (const uint8_t *)in.UTF8String;
     assert(bytes[0] == 0xb8);
     assert(bytes[1] == 0x38);
     bytes += 2;
@@ -45,7 +45,7 @@ void test_loremIpsum() {
 void test_ethWikiEncodeExamples() {
     NSData *out = rlp_encode(@"dog");
     assert(out.length == 4);
-    uint8_t *bytes = (uint8_t *)out.bytes;
+    const uint8_t *bytes = out.bytes;
     assert(bytes[0] == 0x83);
     assert(bytes[1] == 'd');
     assert(bytes[2] == 'o');
@@ -54,7 +54,7 @@ void test_ethWikiEncodeExamples() {
     #define checkByte(input, expected) \
         out = rlp_encode(input); \
         assert(out.length == 1); \
-        bytes = (uint8_t *)out.bytes; \
+        bytes = out.bytes; \
         assert(bytes[0] == expected);
     checkByte(@"", 0x80);
     checkByte(@[], 0xc0);
@@ -72,7 +72,7 @@ void test_ethWikiEncodeExamples() {
     input = [NSData dataWithBytes:value16 length:2];
     out = rlp_encode(input);
     assert(out.length == 3);
-    bytes = (uint8_t *)out.bytes;
+    bytes = out.bytes;
     assert(bytes[0] == 0x82);
     assert(bytes[1] == 0x04);
     assert(bytes[2] == 0x00);
@@ -84,7 +84,27 @@ void test_ethWikiEncodeExamples() {
     test_loremIpsum();
 }
 
+static NSData *fromString(NSString *str) {
+    return [str dataUsingEncoding:NSUTF8StringEncoding];
+}
+
+void test_encodeDecode() {
+    id subject = @[ fromString(@"cat"), fromString(@"dog") ];
+    NSArray *out = rlp_decode(rlp_encode(subject));
+    assert([subject isEqual:out]);
+    subject = fromString(@"Lorem ipsum dolor sit amet, consectetur adipisicing elit");
+    #define checkEncodeDecode() \
+    out = rlp_decode(rlp_encode(subject)); \
+    assert([subject isEqual:out]);
+    checkEncodeDecode();
+    subject = @[ @[], @[@[]], @[ @[], @[@[]] ] ];
+    checkEncodeDecode();
+    subject = @[ @[ @[ @[ @[ @[ fromString(@"쩔어") ] ] ] ] ] ];
+    checkEncodeDecode();
+}
+
 int main() {
     test_ethWikiEncodeExamples();
+    test_encodeDecode();
     return 0;
 }

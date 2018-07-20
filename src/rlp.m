@@ -88,10 +88,6 @@ static void _rlp_encode_root(uint8_t *outBytes, id root, size_t bufLength) {
         NSLog(@"Unsupported type: %@", [root class]);
     }
 }
-static void rlp_encode_root(uint8_t *outBytes, id root) {
-    _rlp_encode_root(outBytes, root, rlp_buf_length(root));
-}
-
 
 FOUNDATION_EXPORT NSData *rlp_encode(id root) {
     size_t length = rlp_buf_length(root);
@@ -103,6 +99,50 @@ FOUNDATION_EXPORT NSData *rlp_encode(id root) {
         freeWhenDone:YES
     ];
 }
+
+static id rlp_decode_root(const uint8_t **bytes) {
+    uint8_t len = **bytes;
+    if (len < 0x80) {
+        return [NSData dataWithBytes:*bytes length:1];
+    }
+    (*bytes)++;
+    if (len < 0xb8) {
+        len -= 0x80;
+        NSData *ret = [NSData dataWithBytes:*bytes length:len];
+        *bytes += len;
+        return ret;
+    }
+    if (len < 0xc0) {
+        len -= 0xb7;
+        size_t longLen = 0;
+        while (len --> 0) {
+            longLen <<= 8;
+            longLen |= *(*bytes)++;
+        }
+        NSData *ret = [NSData dataWithBytes:*bytes length:longLen];
+        *bytes += longLen;
+        return ret;
+    }
+    if (len < 0xf8) {
+        len -= 0xc0;
+    } else {
+        len -= 0xf7;
+        size_t longLen = 0;
+        while (len --> 0) {
+            longLen <<= 8;
+            longLen |= *(*bytes)++;
+        }
+        len = longLen;
+    }
+    NSMutableArray *ret = [NSMutableArray array];
+    const uint8_t *destination = *bytes + len;
+    while (*bytes < destination) {
+        [ret addObject:rlp_decode_root(bytes)];
+    }
+    return ret;
+}
+
 FOUNDATION_EXPORT id rlp_decode(NSData *data) {
-    return nil;// TODO
+    const uint8_t *bytes = data.bytes;
+    return rlp_decode_root(&bytes);
 }
