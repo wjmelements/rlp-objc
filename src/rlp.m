@@ -33,6 +33,7 @@ static size_t rlp_buf_length(id root) {
         }
     } else {
         NSLog(@"Unsupported type: %@", [root class]);
+        rootLen = 0;
     }
     if (rootLen <= 55) {
         return 1 + rootLen;
