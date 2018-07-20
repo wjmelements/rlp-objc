@@ -2,6 +2,22 @@
 
 #import <assert.h>
 
+void test_catDog() {
+    NSArray *root = @[ @"cat", @"dog" ];
+    NSData *rlp = rlp_encode(root);
+    assert(rlp.length == 9);
+    uint8_t *bytes = rlp.bytes;
+    assert(bytes[0] == 0xc8);
+    assert(bytes[1] == 0x83);
+    assert(bytes[2] == 'c');
+    assert(bytes[3] == 'a');
+    assert(bytes[4] == 't');
+    assert(bytes[5] == 0x83);
+    assert(bytes[6] == 'd');
+    assert(bytes[7] == 'o');
+    assert(bytes[8] == 'g');
+}
+
 void test_setTheory3() {
     NSArray *root = @[ @[], @[@[]], @[ @[], @[@[]] ] ];
     NSData *rlp = rlp_encode(root);
@@ -60,6 +76,8 @@ void test_ethWikiEncodeExamples() {
     assert(bytes[0] == 0x82);
     assert(bytes[1] == 0x04);
     assert(bytes[2] == 0x00);
+
+    test_catDog();
 
     test_setTheory3();
 
