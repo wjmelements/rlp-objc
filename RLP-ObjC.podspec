@@ -17,4 +17,8 @@ s.public_header_files = 'include/*'
 s.requires_arc = true
 s.framework = 'Foundation'
 
+s.pod_target_xcconfig = {
+  'HEADER_SEARCH_PATHS' => '"${PODS_ROOT}/RLP-ObjC/include"',
+}
+
 end
