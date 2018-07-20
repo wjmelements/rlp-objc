@@ -12,7 +12,7 @@ s.license = { :type => 'MIT', :file => 'LICENSE' }
 s.author = { 'William Morriss' => 'william.morriss@consensys.net' }
 s.source = { :git => 'git@github.com:wjmelements/rlp-objc.git', :tag => s.version.to_s }
 
-s.source_files = 'src/*'
+s.source_files = 'src/*', 'include/*'
 s.public_header_files = 'include/*'
 s.requires_arc = true
 s.framework = 'Foundation'
