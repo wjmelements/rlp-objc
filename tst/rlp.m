@@ -87,6 +87,37 @@ void test_ethWikiEncodeExamples() {
 static NSData *fromString(NSString *str) {
     return [str dataUsingEncoding:NSUTF8StringEncoding];
 }
+static NSData *fromHex(NSString *hex) {
+    NSMutableData *outputData = [NSMutableData
+        dataWithCapacity:32
+    ];
+    char workingString[3] = { 0, 0, 0 };
+
+    uint32_t start = 0;
+    if (hex.UTF8String[1] == 'x') {
+        start = 2;
+    }
+    if (hex.length % 2) {
+        workingString[0] = '0';
+        workingString[1] = hex.UTF8String[start];
+        unsigned long byte = strtoul(workingString, NULL, 16); // TODO replace strtoul
+        [outputData appendBytes:&byte length:1];
+        start++;
+    }
+    for (uint32_t i = start; i < hex.length; i+=2) {
+        workingString[0] = hex.UTF8String[i];
+        workingString[1] = hex.UTF8String[i+1];
+        unsigned long byte = strtoul(workingString, NULL, 16); // TODO replace strtoul
+        [outputData appendBytes:&byte length:1];
+    }
+    return outputData;
+}
+static NSData *fromBase64(NSString *base64) {
+    return [[NSData alloc]
+        initWithBase64EncodedString:base64
+        options:0
+    ];
+}
 
 void test_encodeDecode() {
     id subject = @[ fromString(@"cat"), fromString(@"dog") ];
@@ -97,14 +128,41 @@ void test_encodeDecode() {
     out = rlp_decode(rlp_encode(subject)); \
     assert([subject isEqual:out]);
     checkEncodeDecode();
+    subject = @[ subject ];
+    checkEncodeDecode();
     subject = @[ @[], @[@[]], @[ @[], @[@[]] ] ];
     checkEncodeDecode();
     subject = @[ @[ @[ @[ @[ @[ fromString(@"쩔어") ] ] ] ] ] ];
     checkEncodeDecode();
+    subject = @[  fromString(@"1") ];
+    checkEncodeDecode();
+
+}
+
+void test_sig() {
+    NSArray *in = @[
+        fromHex(@"9"),
+        fromHex(@"0x4a817c800"),
+        fromHex(@"0x5208"),
+        fromHex(@"0x3535353535353535353535353535353535353535"),
+        fromHex(@"0xDE0B6B3A7640000"),
+        fromHex(@"0x"),
+        fromHex(@"0x25"),
+        fromBase64(@"KO9hNAvZObwhlf5TdWeGYAPhoV08cf9j4VkGIKpjYnY="),
+        fromBase64(@"Z8vp2Jl/dhrstwMwSzgAzPVVyfPcZCFLKX+xlmo7bYM=")
+    ];
+    assert([in isEqual:rlp_decode(rlp_encode(in))]);
+    NSData *sig = fromHex(@"0xf86c098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008025a028ef61340bd939bc2195fe537567866003e1a15d3c71ff63e1590620aa636276a067cbe9d8997f761aecb703304b3800ccf555c9f3dc64214b297fb1966a3b6d83");
+    assert([in isEqual:rlp_decode(sig)]);
+
+    assert([sig isEqual:rlp_encode(in)]);
+    NSArray *out = rlp_decode(sig);
+    assert([sig isEqual:rlp_encode(out)]);
 }
 
 int main() {
     test_ethWikiEncodeExamples();
     test_encodeDecode();
+    test_sig();
     return 0;
 }

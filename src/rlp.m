@@ -2,6 +2,7 @@
 
 // spec: https://github.com/ethereum/wiki/wiki/RLP
 
+// length of encoded size, excluding length prefix byte
 static size_t rlp_len_length(size_t length) {
     size_t loglen = 1;
     while (length >>= 8) loglen++;
@@ -38,7 +39,7 @@ static size_t rlp_buf_length(id root) {
     if (rootLen <= 55) {
         return 1 + rootLen;
     }
-    return rlp_len_length(rootLen) + rootLen;
+    return 1 + rlp_len_length(rootLen) + rootLen;
 }
 
 static void _rlp_encode_buf(uint8_t *outBytes, const uint8_t *inBytes, size_t inLength) {
@@ -78,7 +79,13 @@ static void _rlp_encode_root(uint8_t *outBytes, id root, size_t bufLength) {
         _rlp_encode_buf(outBytes, (uint8_t *)rootString.UTF8String, rootString.length);
     } else if ([root isKindOfClass:[NSArray class]]) {
         NSArray *rootArray = root;
-        size_t innerLength = bufLength - rlp_len_length(bufLength);
+        size_t innerLength;
+        // its' 56 not 55 because bufLength includes the length prefix
+        if (bufLength <= 56) {
+            innerLength = bufLength - 1;
+        } else {
+            innerLength = bufLength - 1 - rlp_len_length(bufLength - 1);
+        }
         rlp_encode_length(outBytes, innerLength, 0xc0);
         for (id leaf in rootArray) {
             size_t leafBufLength = rlp_buf_length(leaf);
@@ -104,7 +111,9 @@ FOUNDATION_EXPORT NSData *rlp_encode(id root) {
 static id rlp_decode_root(const uint8_t **bytes) {
     uint8_t len = **bytes;
     if (len < 0x80) {
-        return [NSData dataWithBytes:*bytes length:1];
+        NSData *small = [NSData dataWithBytes:*bytes length:1];
+        (*bytes)++;
+        return small;
     }
     (*bytes)++;
     if (len < 0xb8) {
