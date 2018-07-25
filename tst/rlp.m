@@ -1,5 +1,8 @@
 #import "rlp.h"
 
+// FIXME this include is required to link under wmake but not to build :(
+#import "NSData+RLP.h"
+
 #import <assert.h>
 
 void test_catDog() {
@@ -160,9 +163,27 @@ void test_sig() {
     assert([sig isEqual:rlp_encode(out)]);
 }
 
+void test_nsvalue() {
+    uint64_t val;
+    NSValue *in;
+    NSData *out;
+    val = 0;
+    in = @(val);
+    out = rlp_encode(in);
+    assert(out.length == 1);
+    assert(((uint8_t *)out.bytes)[0] == 0x80);
+
+    val = 1;
+    in = @(val);
+    out = rlp_encode(in);
+    assert(out.length == 1);
+    assert(((uint8_t *)out.bytes)[0] == 0x01);
+}
+
 int main() {
     test_ethWikiEncodeExamples();
     test_encodeDecode();
     test_sig();
+    test_nsvalue();
     return 0;
 }

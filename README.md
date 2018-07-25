@@ -18,7 +18,7 @@ pod 'RLP-ObjC'
 ```
 #import <rlp.h>
 
-NSData *encoded = rlp_encode(@[ @"cat" ]);
+NSData *encoded = rlp_encode(@[ @"cat", @(0) ]);
 NSArray *decoded = rlp_decode(encoded);
 ```
 

@@ -1,5 +1,7 @@
 #import "rlp.h"
 
+#import "NSData+RLP.h"
+
 // spec: https://github.com/ethereum/wiki/wiki/RLP
 
 // length of encoded size, excluding length prefix byte
@@ -24,6 +26,13 @@ static size_t rlp_buf_length(id root) {
         rootLen = rootString.length;
         if (rootLen == 0
             || (rootLen == 1 && rootString.UTF8String[0] < 0x7f)) {
+            return 1;
+        }
+    } else if ([root isKindOfClass:[NSValue class]]) {
+        NSData *rootData = [NSData rlpFromNSValue:root];
+        rootLen = rootData.length;
+        if (rootLen == 0
+            || (rootLen == 1 && ((uint8_t *)rootData.bytes)[0] < 0x7f)) {
             return 1;
         }
     } else if ([root isKindOfClass:[NSArray class]]) {
@@ -77,10 +86,13 @@ static void _rlp_encode_root(uint8_t *outBytes, id root, size_t bufLength) {
     } else if ([root isKindOfClass:[NSString class]]) {
         NSString *rootString = root;
         _rlp_encode_buf(outBytes, (uint8_t *)rootString.UTF8String, rootString.length);
+    } else if ([root isKindOfClass:[NSValue class]]) {
+        NSData *rootData = [NSData rlpFromNSValue:root];
+        _rlp_encode_buf(outBytes, rootData.bytes, rootData.length);
     } else if ([root isKindOfClass:[NSArray class]]) {
         NSArray *rootArray = root;
         size_t innerLength;
-        // its' 56 not 55 because bufLength includes the length prefix
+        // it's 56 not 55 because bufLength includes the length prefix
         if (bufLength <= 56) {
             innerLength = bufLength - 1;
         } else {
