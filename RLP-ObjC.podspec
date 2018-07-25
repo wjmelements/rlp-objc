@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name = "RLP-ObjC"
-s.version = '1.0.6'
+s.version = '1.0.7'
 s.summary = 'Ethereum RLP in Objective-C'
 
 s.description = <<-DESC
