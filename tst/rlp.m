@@ -1,8 +1,5 @@
 #import "rlp.h"
 
-// FIXME this include is required to link under wmake but not to build :(
-#import "NSData+RLP.h"
-
 #import <assert.h>
 
 void test_catDog() {
