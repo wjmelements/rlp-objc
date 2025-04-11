@@ -1,5 +1,5 @@
 # rlp-objc
-Objective-C implementation of [RLP](https://github.com/ethereum/wiki/wiki/RLP) (Recursive Length Prefix).
+Objective-C implementation of [RLP](https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp/) (Recursive Length Prefix).
 
 This implementation is faster than most other implementations because it only allocates one buffer per encode operation instead of recursively concatenating smaller buffers.
 
